@@ -17,12 +17,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public AuthService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     public String register(RegisterRequest request) {
+        // prevent duplicates email
+        if (userRepository.findByEmail(request.email()) != null) {
+            // throw new RuntimeException("Email already exists");
+            System.out.println("Email already exist");
+        }
+
         User user = new User();
         user.setName(request.name());
         user.setEmail(request.email());
@@ -35,9 +41,15 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email());
+        if (user == null) {
+            // throw new RuntimeException("User not found");
+            System.out.println("User not found");
+
+        }
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            // throw new RuntimeException("Invalid password");
+            System.out.println("Invalid password");
         }
 
         return new LoginResponse("Login successful", user.getRole().name());
