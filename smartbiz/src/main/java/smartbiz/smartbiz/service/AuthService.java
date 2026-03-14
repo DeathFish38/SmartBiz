@@ -26,7 +26,7 @@ public class AuthService {
         // prevent duplicates email
         if (userRepository.findByEmail(request.email()) != null) {
             // throw new RuntimeException("Email already exists");
-            System.out.println("Email already exist");
+            return "Email already exist";
         }
 
         User user = new User();
@@ -43,13 +43,12 @@ public class AuthService {
         User user = userRepository.findByEmail(request.email());
         if (user == null) {
             // throw new RuntimeException("User not found");
-            System.out.println("User not found");
-
+            return new LoginResponse("User not found", "");
         }
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             // throw new RuntimeException("Invalid password");
-            System.out.println("Invalid password");
+            return new LoginResponse("Invalid password", "");
         }
 
         return new LoginResponse("Login successful", user.getRole().name());
