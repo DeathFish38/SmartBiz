@@ -8,9 +8,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity 
+@Entity
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
@@ -18,7 +20,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String name;
 
     @Column(unique = true)
@@ -27,10 +29,6 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private UserRole role; 
+    private UserRole role;
 
-}
-
-enum UserRole{
-    ADMIN, CUSTOMER
 }
