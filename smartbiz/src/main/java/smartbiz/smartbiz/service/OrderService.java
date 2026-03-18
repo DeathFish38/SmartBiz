@@ -1,6 +1,5 @@
 package smartbiz.smartbiz.service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,8 +79,8 @@ public class OrderService {
 
         }
         order.setItems(items);
-        Order savedOrder = orderRepo.save(order);
-        BigDecimal total = savedOrder.getTotalAmount();
+        // Order savedOrder = orderRepo.save(order);
+        // BigDecimal total = savedOrder.getTotalAmount();
         return orderRepo.save(order);
     }
 
