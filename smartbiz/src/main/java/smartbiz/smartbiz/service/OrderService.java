@@ -1,5 +1,6 @@
 package smartbiz.smartbiz.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,8 +67,9 @@ public class OrderService {
                 throw new RuntimeException("Not enough stock for " + product.getName());
             }
 
-            // deduct stock
+            // deduct stock and save
             product.setStock(product.getStock() - req.getQuantity());
+            productRepo.save(product);
 
             CartItem item = new CartItem();
             item.setProduct(product);
@@ -75,10 +77,11 @@ public class OrderService {
             item.setOrder(order);
 
             items.add(item);
+
         }
-
         order.setItems(items);
-
+        Order savedOrder = orderRepo.save(order);
+        BigDecimal total = savedOrder.getTotalAmount();
         return orderRepo.save(order);
     }
 
