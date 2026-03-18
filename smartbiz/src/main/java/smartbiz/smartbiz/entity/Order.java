@@ -15,12 +15,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "orders")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class Order {
 
     @Id
@@ -39,8 +43,4 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<CartItem> items;
 
-}
-
-enum OrderStatus {
-    PENDING, CANCELLED, PAID
 }
