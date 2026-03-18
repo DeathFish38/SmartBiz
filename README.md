@@ -11,15 +11,12 @@
 - Frontend: React, TypeScript, Axios
 - Database: MySQL
 
-## How it work? 
-- To run backend:
-
+## Getting Started
+#### Backend
 cd SmartBiz
 ./mvnw clean install
 ./mvnw spring-boot:run
-
-- To run frontend:
-  
- cd SmartBiz
+#### Frontend
+cd SmartBiz
 ./mvnw clean install
 ./mvnw spring-boot:run
