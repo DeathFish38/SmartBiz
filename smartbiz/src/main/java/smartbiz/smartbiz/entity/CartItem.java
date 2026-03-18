@@ -27,17 +27,18 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer quantity;
-
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
+
+    private Integer quantity;
 
     @ManyToOne
     @JoinColumn(name = "order_id")
     @JsonBackReference
     private Order order;
 
+    // subtotal = product.price * quantity
     public BigDecimal getSubtotal() {
         if (product != null && product.getPrice() != null) {
             return product.getPrice().multiply(BigDecimal.valueOf(quantity));
