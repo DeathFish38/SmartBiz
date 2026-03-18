@@ -30,34 +30,62 @@ public class ProductService {
 
     // Add new product
     public Product createProduct(Product product, Long categoryId) {
-        // Fetch category safely
+        validateProduct(product);
+        // fetch category id
         ProductCategory category = productCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-
         product.setCategory(category);
         return productRepository.save(product);
     }
 
     // Update a product
     public Product updateProduct(Long id, Product updatedProduct, Long categoryId) {
+
         Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("Product not found with id " + id));
 
-        ProductCategory category = productCategoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+        // Update fields safely (ignore nulls)
+        if (updatedProduct.getName() != null)
+            existing.setName(updatedProduct.getName());
+        if (updatedProduct.getDescription() != null)
+            existing.setDescription(updatedProduct.getDescription());
+        if (updatedProduct.getPrice() != null)
+            existing.setPrice(updatedProduct.getPrice());
+        if (updatedProduct.getStock() != null)
+            existing.setStock(updatedProduct.getStock());
+        if (updatedProduct.getImageUrl() != null)
+            existing.setImageUrl(updatedProduct.getImageUrl());
 
-        existing.setName(updatedProduct.getName());
-        existing.setDescription(updatedProduct.getDescription());
-        existing.setPrice(updatedProduct.getPrice());
-        existing.setStock(updatedProduct.getStock());
-        existing.setImageUrl(updatedProduct.getImageUrl());
-        existing.setCategory(category);
+        // Update category if provided
+        if (categoryId != null) {
+            ProductCategory category = productCategoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new RuntimeException("Category not found with id " + categoryId));
+            existing.setCategory(category);
+        }
 
+        // validation
+        validateProduct(existing);
         return productRepository.save(existing);
     }
 
     // Delete product
     public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
+        Product product = getProductById(id);
+        productRepository.delete(product);
+    }
+
+    // validation
+    private void validateProduct(Product product) {
+        if (product.getName() == null || product.getName().isBlank()) {
+            throw new RuntimeException("Product name is required");
+        }
+
+        if (product.getPrice() == null || product.getPrice().doubleValue() < 0) {
+            throw new RuntimeException("Price must be >= 0");
+        }
+
+        if (product.getStock() == null || product.getStock() < 0) {
+            throw new RuntimeException("Stock must be >= 0");
+        }
     }
 }

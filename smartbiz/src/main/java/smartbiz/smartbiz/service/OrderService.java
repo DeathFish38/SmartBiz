@@ -1,9 +1,12 @@
 package smartbiz.smartbiz.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import smartbiz.smartbiz.dto.CartItemRequest;
+import smartbiz.smartbiz.dto.CreateOrderRequest;
 import smartbiz.smartbiz.dto.OrderResponse;
 import smartbiz.smartbiz.entity.CartItem;
 import smartbiz.smartbiz.entity.Order;
@@ -39,31 +42,43 @@ public class OrderService {
     }
 
     // Create a new order
-    public Order createOrder(Long userId, List<CartItem> items) {
-        User user = userRepo.findById(userId)
+    public Order createOrder(CreateOrderRequest request) {
+
+        User user = userRepo.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Order order = new Order();
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
 
-        for (CartItem item : items) {
-            if (item.getQuantity() == null || item.getQuantity() <= 0) {
-                throw new RuntimeException("Invalid quantity");
+        List<CartItem> items = new ArrayList<>();
+
+        for (CartItemRequest req : request.getItems()) {
+
+            if (req.getQuantity() == null || req.getQuantity() <= 0) {
+                throw new RuntimeException("Quantity must be > 0");
             }
-            // get the existing product
-            Product product = productRepo.findById(item.getProduct().getId())
+
+            Product product = productRepo.findById(req.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product not found"));
-            // stock check
-            if (product.getStock() < item.getQuantity()) {
+
+            if (product.getStock() < req.getQuantity()) {
                 throw new RuntimeException("Not enough stock for " + product.getName());
             }
+
             // deduct stock
-            product.setStock(product.getStock() - item.getQuantity());
+            product.setStock(product.getStock() - req.getQuantity());
+
+            CartItem item = new CartItem();
             item.setProduct(product);
+            item.setQuantity(req.getQuantity());
             item.setOrder(order);
+
+            items.add(item);
         }
+
         order.setItems(items);
+
         return orderRepo.save(order);
     }
 

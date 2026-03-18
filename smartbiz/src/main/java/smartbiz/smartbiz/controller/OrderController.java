@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import smartbiz.smartbiz.dto.CreateOrderRequest;
 import smartbiz.smartbiz.dto.OrderResponse;
-import smartbiz.smartbiz.entity.CartItem;
 import smartbiz.smartbiz.entity.Order;
 import smartbiz.smartbiz.entity.OrderStatus;
 import smartbiz.smartbiz.service.OrderService;
@@ -43,7 +43,7 @@ public class OrderController {
     // Create a new order
     @PostMapping
     public OrderResponse createOrder(@RequestBody CreateOrderRequest request) {
-        Order order = orderService.createOrder(request.getUserId(), request.getItems());
+        Order order = orderService.createOrder(request);
         return orderService.mapToResponse(order);
     }
 
@@ -57,28 +57,6 @@ public class OrderController {
     @DeleteMapping("/{id}")
     public void deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
-    }
-
-    // dto post request
-    public static class CreateOrderRequest {
-        private Long userId;
-        private List<CartItem> items;
-
-        public Long getUserId() {
-            return userId;
-        }
-
-        public void setUserId(Long userId) {
-            this.userId = userId;
-        }
-
-        public List<CartItem> getItems() {
-            return items;
-        }
-
-        public void setItems(List<CartItem> items) {
-            this.items = items;
-        }
     }
 
 }
