@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import smartbiz.smartbiz.dto.OrderResponse;
 import smartbiz.smartbiz.entity.CartItem;
 import smartbiz.smartbiz.entity.Order;
 import smartbiz.smartbiz.entity.OrderStatus;
@@ -50,10 +51,10 @@ public class OrderService {
             if (item.getQuantity() == null || item.getQuantity() <= 0) {
                 throw new RuntimeException("Invalid quantity");
             }
-            // get the existing product 
+            // get the existing product
             Product product = productRepo.findById(item.getProduct().getId())
                     .orElseThrow(() -> new RuntimeException("Product not found"));
-            // stock check 
+            // stock check
             if (product.getStock() < item.getQuantity()) {
                 throw new RuntimeException("Not enough stock for " + product.getName());
             }
@@ -76,5 +77,22 @@ public class OrderService {
     // Delete order
     public void deleteOrder(Long orderId) {
         orderRepo.deleteById(orderId);
+    }
+
+    // dto order response
+    public OrderResponse mapToResponse(Order order) {
+        List<OrderResponse.Item> items = order.getItems().stream()
+                .map(i -> new OrderResponse.Item(
+                        i.getProduct().getId(),
+                        i.getProduct().getName(),
+                        i.getQuantity(),
+                        i.getSubtotal()))
+                .toList();
+
+        return new OrderResponse(
+                order.getId(),
+                order.getStatus().name(),
+                order.getTotalAmount(),
+                items);
     }
 }
