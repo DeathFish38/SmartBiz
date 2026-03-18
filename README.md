@@ -2,9 +2,9 @@
 ### A simple mini POS system for staff and customers built with Java and React. 
 
 ## Features
-- Users authentication: Register, login, associate orders.
+- Users authentication: register, login, associate orders.
 - Products: List, create/update/delete, manage stock
-- Cart and orders: Add to cart, create order, calculate total, prevent over-ordering
+- Cart and orders: add to cart, create order, calculate total, prevent over-ordering
 
 ## Tech Stack
 - Backend: Java, Spring Boot, Spring Data JPA
