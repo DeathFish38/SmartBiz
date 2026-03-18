@@ -27,34 +27,52 @@ public class OrderService {
         return orderRepo.findAll();
     }
 
-    // Get a order by id
+    // Get order by ID
     public Order getOrderById(Long id) {
         return orderRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found with id " + id));
     }
 
-    // Create a new order with cart item
+    // Create a new order with cart items
     public Order createOrder(Order order, List<CartItem> items) {
+        // Calculate subtotal for each item automatically
+        for (CartItem item : items) {
+            if (item.getProduct() == null) {
+                throw new RuntimeException("CartItem must have a Product assigned");
+            }
+            item.setSubtotal(item.getProduct().getPrice()
+                    .multiply(BigDecimal.valueOf(item.getQuantity())));
+            item.setOrder(order);
+        }
+
         order.setItems(items);
-        items.forEach(item -> item.setOrder(order));
-        // filter the amount and format
         order.setTotalAmount(items.stream()
                 .map(CartItem::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
         order.setStatus(OrderStatus.PENDING);
+
         return orderRepo.save(order);
     }
 
-    // Add cart item to existing order
+    // Add a cart item to an existing order
     public Order addCartItem(Long orderId, CartItem item) {
         Order order = getOrderById(orderId);
+
+        if (item.getProduct() == null) {
+            throw new RuntimeException("CartItem must have a Product assigned");
+        }
+
+        item.setSubtotal(item.getProduct().getPrice()
+                .multiply(BigDecimal.valueOf(item.getQuantity())));
         item.setOrder(order);
+
         cartItemRepo.save(item);
         order.getItems().add(item);
-        // filter the amount and format
+
         order.setTotalAmount(order.getItems().stream()
                 .map(CartItem::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
+
         return orderRepo.save(order);
     }
 
@@ -71,5 +89,4 @@ public class OrderService {
         cartItemRepo.deleteAll(order.getItems());
         orderRepo.delete(order);
     }
-
 }
