@@ -1,3 +1,16 @@
+// frontend model 
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface ProductCategory {
+  id: number;
+  name: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -5,18 +18,13 @@ export interface Product {
   price: number;
   stock: number;
   imageUrl: string;
-  category: {
-    id: number;
-    name: string;
-  };
+  category: ProductCategory;
 }
 
 export interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  stock: number;
+  product: Product;
   quantity: number;
+  subtotal: number;
 }
 
 export interface OrderItem {
@@ -30,9 +38,5 @@ export interface Order {
   id: number;
   status: string;
   totalAmount: number;
-  user: {
-    id: number;
-    name: string;
-  };
   items: OrderItem[];
 }

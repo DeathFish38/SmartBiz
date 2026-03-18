@@ -1,124 +1,59 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  stock: number;
-}
-
-interface CartItem {
-  productId: number;
-  name: string;
-  quantity: number;
-  subtotal: number;
-}
-
-interface OrderResponse {
-  id: number;
-  status: string;
-  totalAmount: number;
-  items: CartItem[];
-}
+// src/App.tsx
+import React, { useState } from "react";
+import { Products } from "./components/Products";
+import { Cart } from "./components/Cart";
+import { Orders } from "./components/Orders";
+import { Users } from "./components/Users";
+import type { CartItem, Product, User } from "./types";
+import { api } from "./api";
 
 const App: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [order, setOrder] = useState<OrderResponse | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // Fetch products
-  useEffect(() => {
-    axios.get<Product[]>("http://localhost:8080/api/products")
-      .then(res => setProducts(res.data))
-      .catch(err => console.error(err));
-  }, []);
-
-  const addToCart = (product: Product) => {
-    setCart(prev => {
-      const existing = prev.find(i => i.productId === product.id);
-      if (existing) {
-        return prev.map(i =>
-          i.productId === product.id
-            ? { ...i, quantity: i.quantity + 1, subtotal: (i.quantity + 1) * product.price }
-            : i
-        );
-      }
-      return [...prev, { productId: product.id, name: product.name, quantity: 1, subtotal: product.price }];
-    });
-  };
-
-  const removeFromCart = (productId: number) => {
-    setCart(prev => prev.filter(i => i.productId !== productId));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent page reload
-    if (cart.length === 0) return alert("Cart is empty!");
-
-    try {
-      const payload = {
-        userId: 1, // Replace with logged-in user id
-        items: cart.map(i => ({ productId: i.productId, quantity: i.quantity }))
-      };
-
-      const res = await axios.post<OrderResponse>("http://localhost:8080/api/orders", payload);
-      setOrder(res.data);
-      setCart([]); // clear cart
-      alert("Order submitted successfully!");
-    } catch (err: any) {
-      console.error(err);
-      alert(err.response?.data?.error || "Error submitting order");
+  const addToCart = (product: Product, quantity: number) => {
+    const existing = cart.find(i => i.product.id === product.id);
+    if (existing) {
+      const updated = cart.map(i =>
+        i.product.id === product.id
+          ? { ...i, quantity: i.quantity + quantity, subtotal: (i.quantity + quantity) * product.price }
+          : i
+      );
+      setCart(updated);
+    } else {
+      setCart([...cart, { product, quantity, subtotal: product.price * quantity }]);
     }
   };
 
+  const removeFromCart = (productId: number) => {
+    setCart(cart.filter(i => i.product.id !== productId));
+  };
+
+  const createOrder = async () => {
+    if (!selectedUser) {
+      alert("Please select a user first!");
+      return;
+    }
+    if (cart.length === 0) {
+      alert("Cart is empty!");
+      return;
+    }
+    const request = {
+      userId: selectedUser.id,
+      items: cart.map(i => ({ productId: i.product.id, quantity: i.quantity })),
+    };
+    await api.post("/orders", request);
+    setCart([]);
+    alert("Order created!");
+  };
+
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Products</h1>
-      <ul>
-        {products.map(p => (
-          <li key={p.id}>
-            {p.name} - ${p.price.toFixed(2)} (Stock: {p.stock})
-            <button onClick={() => addToCart(p)} style={{ marginLeft: 10 }}>Add to Cart</button>
-          </li>
-        ))}
-      </ul>
-
-      <h2>Cart</h2>
-      {cart.length === 0 ? (
-        <p>Cart is empty</p>
-      ) : (
-        <ul>
-          {cart.map(item => (
-            <li key={item.productId}>
-              {item.name} x {item.quantity} = ${item.subtotal.toFixed(2)}
-              <button onClick={() => removeFromCart(item.productId)} style={{ marginLeft: 10 }}>Remove</button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <button type="submit" disabled={cart.length === 0}>
-          Submit Order
-        </button>
-      </form>
-
-      {order && (
-        <div style={{ marginTop: "20px" }}>
-          <h2>Last Order</h2>
-          <p>Order ID: {order.id}</p>
-          <p>Status: {order.status}</p>
-          <p>Total: ${order.totalAmount.toFixed(2)}</p>
-          <ul>
-            {order.items.map(i => (
-              <li key={i.productId}>
-                {i.name} x {i.quantity} = ${i.subtotal.toFixed(2)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+    <div style={{ padding: 20 }}>
+      <h1>Simple POS System</h1>
+      <Users selectedUser={selectedUser} setSelectedUser={setSelectedUser} />
+      <Products addToCart={addToCart} />
+      <Cart cart={cart} removeFromCart={removeFromCart} createOrder={createOrder} />
+      <Orders />
     </div>
   );
 };

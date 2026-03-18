@@ -1,34 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { getOrders } from "../api/api";
-import type { Order } from "../model/types";
+import type { Order } from "../types";
+import { api } from "../api";
 
-const Orders: React.FC = () => {
+export const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    getOrders().then((res) => setOrders(res.data));
+    api.get("/orders").then(res => setOrders(res.data));
   }, []);
 
   return (
     <div>
       <h2>Orders</h2>
-      {orders.map((o) => (
-        <div key={o.id} style={{ border: "1px solid #ccc", margin: 10, padding: 10 }}>
-          <p>Order ID: {o.id}</p>
-          <p>User: {o.user.name}</p>
-          <p>Status: {o.status}</p>
-          <p>Total: ${o.totalAmount}</p>
-          <ul>
-            {o.items.map((i, idx) => (
-              <li key={idx}>
-                {i.name} x {i.quantity} = ${i.subtotal}
-              </li>
-            ))}
-          </ul>
+      {orders.map(o => (
+        <div key={o.id} style={{ border: "1px solid gray", margin: 5, padding: 5 }}>
+          <p>Order #{o.id} - {o.status} - Total: ${o.totalAmount.toFixed(2)}</p>
+          {o.items.map(i => (
+            <p key={i.productId}>{i.name} x {i.quantity} = ${i.subtotal.toFixed(2)}</p>
+          ))}
         </div>
       ))}
     </div>
   );
 };
-
-export default Orders;

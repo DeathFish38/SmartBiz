@@ -53,4 +53,9 @@ public class AuthService {
 
         return new LoginResponse("Login successful", user.getRole().name());
     }
+
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
 }

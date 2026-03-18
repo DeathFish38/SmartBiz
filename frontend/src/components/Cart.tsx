@@ -1,41 +1,32 @@
+// src/components/Cart.tsx
 import React from "react";
-import type { CartItem } from "../model/types";
+import type { CartItem } from "../types";
 
 interface Props {
   cart: CartItem[];
-  updateQuantity: (index: number, quantity: number) => void;
-  removeItem: (index: number) => void;
-  submitOrder: (userId: number) => void;
-  userId: number;
+  removeFromCart: (productId: number) => void;
+  createOrder: () => void;
 }
 
-const Cart: React.FC<Props> = ({ cart, updateQuantity, removeItem, submitOrder, userId }) => {
-  const total = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
+export const Cart: React.FC<Props> = ({ cart, removeFromCart, createOrder }) => {
+  const total = cart.reduce((acc, i) => acc + i.subtotal, 0);
 
   return (
     <div>
       <h2>Cart</h2>
       {cart.length === 0 && <p>Cart is empty</p>}
-      {cart.map((item, index) => (
-        <div key={index}>
-          <p>
-            {item.name} - ${item.price} x{" "}
-            <input
-              type="number"
-              value={item.quantity}
-              min={1}
-              max={item.stock}
-              onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
-            />{" "}
-            = ${item.price * item.quantity}
-          </p>
-          <button onClick={() => removeItem(index)}>Remove</button>
+      {cart.map(i => (
+        <div key={i.product.id}>
+          {i.product.name} x {i.quantity} = ${i.subtotal.toFixed(2)}
+          <button onClick={() => removeFromCart(i.product.id)}>Remove</button>
         </div>
       ))}
-      <h3>Total: ${total.toFixed(2)}</h3>
-      {cart.length > 0 && <button onClick={() => submitOrder(userId)}>Submit Order</button>}
+      {cart.length > 0 && (
+        <>
+          <p>Total: ${total.toFixed(2)}</p>
+          <button onClick={createOrder}>Submit Order</button>
+        </>
+      )}
     </div>
   );
 };
-
-export default Cart;
