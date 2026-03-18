@@ -57,7 +57,7 @@ public class OrderController {
         orderService.deleteOrder(id);
     }
 
-    // DTO for create order request
+    // dto post request 
     public static class CreateOrderRequest {
         private Long userId;
         private List<CartItem> items;

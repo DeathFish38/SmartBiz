@@ -40,25 +40,29 @@ public class OrderService {
     // Create a new order
     public Order createOrder(Long userId, List<CartItem> items) {
         User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id " + userId));
-
-        // Link products and order to cart items
-        for (CartItem item : items) {
-            Product product = productRepo.findById(item.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Product not found with id " + item.getProduct().getId()));
-            item.setProduct(product);
-        }
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Order order = new Order();
         order.setUser(user);
-        order.setItems(items);
         order.setStatus(OrderStatus.PENDING);
 
-        // Link back each cart item to this order
         for (CartItem item : items) {
+            if (item.getQuantity() == null || item.getQuantity() <= 0) {
+                throw new RuntimeException("Invalid quantity");
+            }
+            // get the existing product 
+            Product product = productRepo.findById(item.getProduct().getId())
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+            // stock check 
+            if (product.getStock() < item.getQuantity()) {
+                throw new RuntimeException("Not enough stock for " + product.getName());
+            }
+            // deduct stock
+            product.setStock(product.getStock() - item.getQuantity());
+            item.setProduct(product);
             item.setOrder(order);
         }
-
+        order.setItems(items);
         return orderRepo.save(order);
     }
 
