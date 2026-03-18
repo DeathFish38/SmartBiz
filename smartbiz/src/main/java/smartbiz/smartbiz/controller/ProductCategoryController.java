@@ -2,6 +2,7 @@ package smartbiz.smartbiz.controller;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import smartbiz.smartbiz.service.ProductCategoryService;
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class ProductCategoryController {
 
     private final ProductCategoryService productCategoryService;
