@@ -2,6 +2,8 @@ package smartbiz.smartbiz.entity;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,15 +21,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name="cart_items")
+@Table(name = "cart_items")
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Integer quantity;
-    private BigDecimal price;
-    private BigDecimal subtotal; // quantity x price
 
     @ManyToOne
     @JoinColumn(name = "product_id")
@@ -35,6 +35,14 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
+    @JsonBackReference
     private Order order;
+
+    public BigDecimal getSubtotal() {
+        if (product != null && product.getPrice() != null) {
+            return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+        }
+        return BigDecimal.ZERO;
+    }
 
 }

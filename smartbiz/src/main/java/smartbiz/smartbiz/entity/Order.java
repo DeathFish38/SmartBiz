@@ -3,6 +3,8 @@ package smartbiz.smartbiz.entity;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -24,7 +26,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name="orders")
+@Table(name = "orders")
 public class Order {
 
     @Id
@@ -41,6 +43,15 @@ public class Order {
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<CartItem> items;
 
+    public BigDecimal getTotalAmount() {
+        if (items == null || items.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return items.stream()
+                .map(CartItem::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }

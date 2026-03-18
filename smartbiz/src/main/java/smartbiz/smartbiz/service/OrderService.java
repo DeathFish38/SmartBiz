@@ -35,21 +35,22 @@ public class OrderService {
 
     // Create a new order with cart items
     public Order createOrder(Order order, List<CartItem> items) {
-        // Calculate subtotal for each item automatically
+        // Assign the order to each item
         for (CartItem item : items) {
             if (item.getProduct() == null) {
                 throw new RuntimeException("CartItem must have a Product assigned");
             }
-            item.setSubtotal(item.getProduct().getPrice()
-                    .multiply(BigDecimal.valueOf(item.getQuantity())));
             item.setOrder(order);
         }
 
         order.setItems(items);
-        order.setTotalAmount(items.stream()
-                .map(CartItem::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
         order.setStatus(OrderStatus.PENDING);
+
+        order.setTotalAmount(
+                items.stream()
+                     .map(CartItem::getSubtotal)
+                     .reduce(BigDecimal.ZERO, BigDecimal::add)
+        );
 
         return orderRepo.save(order);
     }
@@ -62,16 +63,16 @@ public class OrderService {
             throw new RuntimeException("CartItem must have a Product assigned");
         }
 
-        item.setSubtotal(item.getProduct().getPrice()
-                .multiply(BigDecimal.valueOf(item.getQuantity())));
         item.setOrder(order);
-
         cartItemRepo.save(item);
         order.getItems().add(item);
 
-        order.setTotalAmount(order.getItems().stream()
-                .map(CartItem::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        //update total amount
+        order.setTotalAmount(
+                order.getItems().stream()
+                     .map(CartItem::getSubtotal)
+                     .reduce(BigDecimal.ZERO, BigDecimal::add)
+        );
 
         return orderRepo.save(order);
     }
