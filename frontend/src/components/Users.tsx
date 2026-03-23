@@ -1,32 +1,43 @@
-// src/components/Users.tsx
-import React, { useEffect, useState } from "react";
-import type { User } from "../types";
-import { api } from "../api";
+import { useEffect, useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { api } from "../api"
+import { User } from "../types"
 
 interface Props {
-  selectedUser: User | null;
-  setSelectedUser: (user: User) => void;
+  selectedUser: User | null
+  setSelectedUser: (user: User) => void
 }
 
 export const Users: React.FC<Props> = ({ selectedUser, setSelectedUser }) => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([])
 
   useEffect(() => {
-    api.get("/auth/user/{id}").then(res => setUsers(res.data));
-  }, []);
+    api.get("/auth/users").then(res => setUsers(res.data))
+  }, [])
 
   return (
-    <div>
-      <h2>Users</h2>
+    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
       {users.map(u => (
-        <div key={u.id} style={{ margin: 5 }}>
-          <span>{u.name} ({u.email})</span>
-          <button style={{ marginLeft: 10 }} onClick={() => setSelectedUser(u)}>
-            {selectedUser?.id === u.id ? "Selected" : "Select"}
-          </button>
-        </div>
+        <Card
+          key={u.id}
+          className={`cursor-pointer transition hover:shadow-lg ${
+            selectedUser?.id === u.id ? "border-green-500 ring-2 ring-green-200" : ""
+          }`}
+          onClick={() => setSelectedUser(u)}
+        >
+          <CardContent className="flex justify-between items-center p-4">
+            <div>
+              <p className="font-medium">{u.name}</p>
+              <p className="text-sm text-muted-foreground">{u.email}</p>
+            </div>
+
+            <Button variant="secondary" size="sm">
+              {selectedUser?.id === u.id ? "Selected" : "Select"}
+            </Button>
+          </CardContent>
+        </Card>
       ))}
-      {selectedUser && <p>Current User: {selectedUser.name}</p>}
     </div>
-  );
-};
+  )
+}
