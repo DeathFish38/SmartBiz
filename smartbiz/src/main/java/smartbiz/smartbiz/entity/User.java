@@ -1,11 +1,7 @@
 package smartbiz.smartbiz.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,11 +26,7 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    //hide password
-    @JsonIgnore
-    private String password;
-
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
+    @Column(unique = true)
+    private String phone;
 
 }
